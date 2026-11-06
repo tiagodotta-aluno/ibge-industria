@@ -1,0 +1,51 @@
+services:
+
+  # COORDENADOR DO ECOSSISTEMA
+  manager:
+    build: .
+    container_name: ibge_manager
+    command: python -m manager.main
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      DATABASE_URL: postgresql://ibge:ibge@postgres:5432/ibge
+    volumes:
+      - ./data:/data
+    depends_on:
+      - redis
+      - postgres
+    restart: unless-stopped
+
+  # NÓS DE PROCESSAMENTO
+  worker:
+    build: .
+    command: celery -A workers.celery_app worker --loglevel=INFO --concurrency=1
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      DATABASE_URL: postgresql://ibge:ibge@postgres:5432/ibge
+    volumes:
+      - ./data:/data
+    depends_on:
+      - redis
+      - postgres
+    restart: unless-stopped
+
+  # FILA DE COMUNICAÇÃO
+  redis:
+    image: redis:7-alpine
+    container_name: ibge_redis
+    restart: unless-stopped
+
+  # BANCO DE DADOS
+  postgres:
+    image: postgres:16-alpine
+    container_name: ibge_postgres
+    environment:
+      POSTGRES_USER: ibge
+      POSTGRES_PASSWORD: ibge
+      POSTGRES_DB: ibge
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
