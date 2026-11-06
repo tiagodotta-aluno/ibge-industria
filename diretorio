@@ -1,0 +1,19 @@
+ibge-industria/
+│
+├── docker-compose.yml
+├── Dockerfile
+├── requirements.txt
+├── .env
+│
+├── manager/
+│   ├── __init__.py
+│   └── main.py
+│
+├── workers/
+│   ├── __init__.py
+│   ├── celery_app.py
+│   └── tasks.py
+│
+└── data/
+    ├── raw/
+    └── processed/
